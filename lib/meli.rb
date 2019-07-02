@@ -9,7 +9,7 @@ require 'yaml'
 
 class Meli
     attr_accessor :access_token, :refresh_token
-    attr_reader :secret, :app_id, :https
+    attr_reader :secret, :app_id, :https, :new_format
 
     config = YAML.load_file(File.expand_path(File.dirname(__FILE__) + "/config.yml"))
     SDK_VERSION = config["config"]["sdk_version"]
@@ -18,11 +18,12 @@ class Meli
     OAUTH_URL = config["config"]["oauth_url"]
 
     #constructor
-    def initialize(app_id = nil, secret = nil, access_token = nil, refresh_token = nil)
+    def initialize(app_id = nil, secret = nil, access_token = nil, refresh_token = nil, new_format = false)
         @access_token = access_token
         @refresh_token = refresh_token
         @app_id = app_id
         @secret = secret
+        @new_format = new_format
         api_url = URI.parse API_ROOT_URL
         @https = Net::HTTP.new(api_url.host, api_url.port)
         @https.use_ssl = true
@@ -105,6 +106,7 @@ class Meli
         req['Accept'] = 'application/json'
         req['User-Agent'] = SDK_VERSION
         req['Content-Type'] = 'application/json'
+        req['X-Format-New'] = 'true' if @new_format
         response = @https.request(req)
     end
 
