@@ -124,6 +124,22 @@ class Meli
         execute req
     end
 
+    def post_file(path, file, params = {})
+        uri = make_path(path, params)
+        req = Net::HTTP::Post.new("#{uri.path}?#{uri.query}")
+        boundary = "AaB03x"
+        post_body = []
+        post_body << "--#{boundary}"
+        post_body << "Content-Disposition: form-data; name=\"file\"; filename=\"#{File.basename(file)}\""
+        post_body << "Content-Type: text/plain"
+        post_body << ""
+        post_body << File.read(file)
+        post_body << "--#{boundary}--"
+        req.body = post_body.join("\r\n")
+        req["Content-Type"] = "multipart/form-data; boundary=#{boundary}"
+        execute req
+    end
+
     def put(path, body, params = {})
         uri = make_path(path, params)
         req = Net::HTTP::Put.new("#{uri.path}?#{uri.query}")
