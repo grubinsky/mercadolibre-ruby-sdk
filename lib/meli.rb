@@ -105,7 +105,7 @@ class Meli
     def execute(req)
         req['Accept'] = 'application/json'
         req['User-Agent'] = SDK_VERSION
-        req['Content-Type'] = 'application/json'
+        req['Content-Type'] ||= 'application/json'
         req['X-Format-New'] = 'true' if @new_format
         response = @https.request(req)
     end
