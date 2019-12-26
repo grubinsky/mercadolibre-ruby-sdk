@@ -105,7 +105,7 @@ class Meli
     def execute(req)
         req['Accept'] = 'application/json'
         req['User-Agent'] = SDK_VERSION
-        req['Content-Type'] = 'application/json'
+        req['Content-Type'] ||= 'application/json'
         req['X-Format-New'] = 'true' if @new_format
         response = @https.request(req)
     end
@@ -121,6 +121,22 @@ class Meli
         req = Net::HTTP::Post.new("#{uri.path}?#{uri.query}")
         req.set_form_data(params)
         req.body = body.to_json unless body.nil?
+        execute req
+    end
+
+    def post_file(path, file, params = {})
+        uri = make_path(path, params)
+        req = Net::HTTP::Post.new("#{uri.path}?#{uri.query}")
+        boundary = "AaB03x"
+        post_body = []
+        post_body << "--#{boundary}"
+        post_body << "Content-Disposition: form-data; name=\"file\"; filename=\"#{File.basename(file)}\""
+        post_body << "Content-Type: text/plain"
+        post_body << ""
+        post_body << File.read(file)
+        post_body << "--#{boundary}--"
+        req.body = post_body.join("\r\n")
+        req["Content-Type"] = "multipart/form-data; boundary=#{boundary}"
         execute req
     end
 
